@@ -90,14 +90,14 @@ const FilterForm = ({ onGenerateSummary }) => {
   const labelStyle = {
     fontWeight: "600",
     fontFamily: "Albert Sans, sans-serif",
-    fontSize: "1rem",
+    fontSize: "0.8rem",
     color: "#444",
     marginBottom: "0.3rem"
   };
 
   const buttonStyle = {
     width: "100%",
-    padding: "1.2rem",
+    padding: "0.7rem 1.2rem",
     backgroundColor: "black",
     opacity: 0.65,
     color: "#fff",
