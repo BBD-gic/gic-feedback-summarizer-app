@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import MultiSelectDropdown from "./MultiSelectDropdown";
 
 const fetchFilters = async (selections) => {
-  const res = await fetch("http://localhost:3001/filters", {
+  const res = await fetch("https://gic-feedback-summarizer-app.onrender.com/filters", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(selections),
