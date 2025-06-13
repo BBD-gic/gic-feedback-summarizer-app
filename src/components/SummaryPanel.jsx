@@ -30,7 +30,7 @@ const SummaryPanel = ({ selectedFilters }) => {
 
   useEffect(() => {
     setLoading(true);
-    fetch("http://localhost:3001/generate-summary", {
+    fetch("https://gic-feedback-summarizer-app.onrender.com/generate-summary", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(selectedFilters || {})
@@ -333,7 +333,7 @@ const SummaryPanel = ({ selectedFilters }) => {
             setUpdating(true);
             setUpdateStatus("");
             try {
-              const res = await fetch("http://localhost:3001/sync-child-data");
+              const res = await fetch("https://gic-feedback-summarizer-app.onrender.com/sync-child-data");
               let data;
               try {
                 data = await res.json();
