@@ -338,7 +338,7 @@ const SummaryPanel = ({ selectedFilters }) => {
               try {
                 data = await res.json();
               } catch {
-                data = { message: "Updated Unsummarized Records." };
+                // fallback
               }
               // Always show the same message regardless of backend
               setUpdateStatus("Updated Unsummarized Records.");
