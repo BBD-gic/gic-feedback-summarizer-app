@@ -90,7 +90,7 @@ const FilterForm = ({ onGenerateSummary }) => {
   const labelStyle = {
     fontWeight: "600",
     fontFamily: "Albert Sans, sans-serif",
-    fontSize: "0.95rem",
+    fontSize: "0.85rem",
     color: "#444",
     marginBottom: "0.3rem"
   };
@@ -140,6 +140,11 @@ const FilterForm = ({ onGenerateSummary }) => {
                 isOpen={openDropdown === label}
                 setIsOpen={(val) => setOpenDropdown(val ? label : null)}
                 disabled={!isEnabled(label)}
+                style={{
+                  height: "32px",      // reduced height
+                  fontSize: "0.85rem", // smaller text
+                  padding: "4px 8px"   // optional: tighter padding
+                }}
               />
             </div>
           ))}
