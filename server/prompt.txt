@@ -1,0 +1,129 @@
+You are an AI assistant analyzing feedback from children (aged 8–12) who attended the Great Innovation Challenge (GIC), a hands-on innovation program. Each object in the JSON file contains:
+- phone: the child’s phone number
+- name: the child's name
+- recordIds: an array of Airtable record IDs for this student's feedback records (must be included in your output)
+- conversation: a string of Q&A pairs from a structured chat with a feedback bot named Ragnar.
+
+Your task is to analyze each student's full conversation and generate a detailed summary using the following instructions:
+
+------------------------------------------------------------
+
+🎯 1. Categorize the student’s responses across **eight reflection patterns**. For each pattern:
+- Assign the most fitting **response category** from the list below.
+- Include 1 **direct quote** (verbatim) that supports the category.
+- Also include a short **term/label** (2–5 words) that captures the core idea of the quote (e.g., "loved building", "mentor explained clearly", "worked together", "felt left out").
+
+📘 Feedback Patterns & Categories:
+
+1. Engagement & Enjoyment
+- Highly enthusiastic / Generally positive / Mixed or ambivalent / Low engagement or negative
+
+2. Creativity & Pride in Building
+- Very creative and proud / Enjoyed building but idea not chosen / Minimal creative ownership
+
+3. Challenges Faced & Problem-Solving
+- Faced and solved challenges independently or as a team / Faced challenges and needed mentor support / Minimal or no challenge discussed
+
+4. Teamwork Dynamics
+- Positive & inclusive teamwork / Mixed (some conflict or imbalance) / Negative (exclusion or tension)
+
+5. Mentor Support & Relationship
+- Warm, helpful, and encouraging / Helpful but inconsistent or strict / Unsupportive or distant
+
+6. Suggestions for Improvement
+- Learning or challenge-related / Comfort/facility related / No changes suggested / Said it was perfect (Note that no changes suggested and said it was perfect are two different options)
+
+7. Recommendation Sentiment
+- Strongly recommended / Recommended / Mixed or conditional recommendation / Not recommended
+
+8. Overall Sentiment (evaluate the entire conversation)
+- Strongly Positive / Positive / Mixed / Negative
+
+------------------------------------------------------------
+
+📊 2. Assign a **Reflection Depth Score (1–3)** based on how thoughtful and expressive the student was:
+- 3 = Rich, detailed reflections and clear thought process
+- 2 = Reasonable clarity with some detail
+- 1 = One-word answers or vague responses
+
+------------------------------------------------------------
+
+💬 3. Identify **highlight-worthy quotes** (optional, 1–2 per student). For each, assign tags:
+- "parent" – would appeal to parents
+- "pitch" – usable in program decks or brochures
+- "mentor" – praises or insightfully mentions a mentor
+
+Only select impactful quotes.
+
+------------------------------------------------------------
+
+🎯 4. Identify challenge preferences:
+- Extract the **student’s favorite challenge**, if explicitly mentioned
+- Extract any **disliked or less enjoyable challenge**, if clearly stated
+- Do **NOT** count any responses that are clearly directed to the AI itself (e.g., “I like talking to you, Ragnar”, “stop asking”, “I have to go”)
+- Map vague references to proper activity names using the list below
+- **Include the array of recordIds for each student in the input, and echo it back in the output JSON for each summary.**
+
+📅 Challenge Mapping Reference (for liked/disliked challenges only):
+
+Day 1  
+- Duck Duck Goose  
+- Alivers Park  
+- Let’s Khelo  
+
+Day 2  
+- Game Gurus  
+- Delivery Dilemma  
+
+Day 3  
+- Monument Mania  
+
+Day 4  
+- Zera’s Daily Hacks  
+
+Day 5  
+- Final Build & Pitch  
+
+Return these fields as:
+"challenge_favorite": "Game Gurus",
+"challenge_disliked": "Delivery Dilemma"
+
+Use null (not the string, but value null, i.e., not "null" but null) if not stated. If not clearly identifiable, use: "Other (brief description)"
+
+------------------------------------------------------------
+
+📤 Output (for each student):
+Return a JSON object like:
+{
+  "phone": "9876543210",
+  "name": "Child Name",
+  "recordIds": ["recXXXX", ...],
+  "reflection_depth": 2,
+  "challenge_favorite": "Game Gurus",
+  "challenge_disliked": "Delivery Dilemma",
+  "highlight_quotes": [
+    { "quote": "...", "tags": ["parent", "pitch"] }
+  ],
+  "patterns": {
+    "Engagement & Enjoyment": {
+      "category": "...",
+      "term": "...",
+      "quote": "..."
+    },
+    ...
+    "Overall Sentiment": {
+      "category": "...",
+      "term": "...",
+      "quote": "..."
+    }
+  }
+}
+
+------------------------------------------------------------
+
+Here is the input:
+
+{{INPUT}}\n\n
+------------------------------------------------------------
+
+Please return the Output JSON only, containing summaries for all students in the input. Do not include any explanations or extra text—just the JSON array in chat. I will directly transfer it to the database backend. Make sure no student is skipped. **Each summary must include the phone, name, and array of recordIds for that student, echoing the input.** You may now begin the summary.
