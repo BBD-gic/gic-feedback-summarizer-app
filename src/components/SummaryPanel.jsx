@@ -290,17 +290,26 @@ const SummaryPanel = ({ selectedFilters }) => {
                 .filter(([pattern]) => pattern !== "Total records available" && pattern !== "Records fetched")
                 .map(([pattern, categories]) => (
                   <div key={pattern} style={{ marginBottom: "1.75rem" }}>
-                    <h3 style={{ fontSize: "1.2rem", marginBottom: "0.75rem" }}>
+                    <h3 style={{ fontSize: "1.05rem", marginBottom: "0.6rem", lineHeight: "1.6" }}>
                       {patternEmojis[pattern] || "🔹"} {pattern}
                     </h3>
                     {Object.entries(categories).map(([category, { count, terms }]) => (
-                      <div key={category} style={{ marginBottom: "0.75rem", paddingLeft: "1rem" }}>
-                        <p style={{ margin: 0, fontSize: "1rem" }}>
+                      <div key={category} style={{ marginBottom: "0.7rem", paddingLeft: "1rem" }}>
+                        <p style={{ margin: 0, fontSize: "0.95rem", lineHeight: "1.7" }}>
                           • <strong>{count} out of {summaryData.total}</strong> students were <em>{category.toLowerCase()}</em>.
                         </p>
                         {terms.length > 0 && (
-                          <p style={{ fontSize: "0.95rem", color: "#4a5568", marginLeft: "1rem", marginTop: "0.25rem" }}>
-                            🏷️ Common phrases: {terms.map((term, i) => (
+                          <p
+                            style={{
+                              fontSize: "0.9rem",
+                              color: "#4a5568",
+                              marginLeft: "1rem",
+                              marginTop: "0.25rem",
+                              lineHeight: "1.6"
+                            }}
+                          >
+                            🏷️ Common phrases:{" "}
+                            {terms.map((term, i) => (
                               <span key={i} style={{ marginRight: "0.5rem" }}>
                                 "{term}"
                               </span>
@@ -310,7 +319,7 @@ const SummaryPanel = ({ selectedFilters }) => {
                       </div>
                     ))}
                   </div>
-                ))}
+              ))}
             </>
           )}
         </div>
