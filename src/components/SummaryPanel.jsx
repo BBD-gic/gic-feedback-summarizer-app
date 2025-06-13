@@ -333,27 +333,18 @@ const SummaryPanel = ({ selectedFilters }) => {
             setUpdating(true);
             setUpdateStatus("");
             try {
-              const res = await fetch("https://gic-feedback-summarizer-app.onrender.com/sync-child-data");
-              let data;
-              try {
-                await res.json();
-              } catch {
-                // fallback
-              }
-              // Always show the same message regardless of backend
+              await fetch("https://gic-feedback-summarizer-app.onrender.com/sync-child-data");
               setUpdateStatus("Updated Unsummarized Records.");
-              updateTimeoutRef.current = setTimeout(() => {
-                setUpdating(false);
-                setUpdateStatus("");
-              }, 2000);
             } catch (err) {
               setUpdateStatus("Error updating summaries");
+            } finally {
               updateTimeoutRef.current = setTimeout(() => {
                 setUpdating(false);
                 setUpdateStatus("");
               }, 2000);
             }
           }}
+
         >
           Update Summaries
         </button>
