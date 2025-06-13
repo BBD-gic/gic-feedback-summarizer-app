@@ -336,7 +336,7 @@ const SummaryPanel = ({ selectedFilters }) => {
               const res = await fetch("https://gic-feedback-summarizer-app.onrender.com/sync-child-data");
               let data;
               try {
-                data = await res.json();
+                await res.json();
               } catch {
                 // fallback
               }
