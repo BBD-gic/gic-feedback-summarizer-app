@@ -140,11 +140,6 @@ const FilterForm = ({ onGenerateSummary }) => {
                 isOpen={openDropdown === label}
                 setIsOpen={(val) => setOpenDropdown(val ? label : null)}
                 disabled={!isEnabled(label)}
-                style={{
-                  height: "28px",      // reduced height
-                  fontSize: "0.8rem", // smaller text
-                  padding: "4px 8px"   // optional: tighter padding
-                }}
               />
             </div>
           ))}
