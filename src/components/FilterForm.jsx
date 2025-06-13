@@ -90,7 +90,7 @@ const FilterForm = ({ onGenerateSummary }) => {
   const labelStyle = {
     fontWeight: "600",
     fontFamily: "Albert Sans, sans-serif",
-    fontSize: "0.8rem",
+    fontSize: "0.95rem",
     color: "#444",
     marginBottom: "0.3rem"
   };
