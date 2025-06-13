@@ -386,7 +386,7 @@ const iconStyle = {
 };
 
 const bottomBtnStyle = {
-  padding: "1rem 1.4rem",
+  padding: "0.75rem 1rem",
   backgroundColor: "black",
   opacity: 0.65,
   color: "#fff",
