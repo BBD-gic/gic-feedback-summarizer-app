@@ -38,7 +38,8 @@ const DiveDeep = () => {
             setSelectedOptions(options);
             setSelectAll(true);
         }
-    }, [options]);
+    }, [options, pattern]);
+
 
     // Fetch available options for selected pattern
     useEffect(() => {
@@ -61,7 +62,8 @@ const DiveDeep = () => {
         if (selectAll !== allSelected) {
             setSelectAll(allSelected);
         }
-    }, [options, selectedOptions]);
+    }, [options, selectedOptions, selectAll]);
+
 
 
     // Fetch results for selected pattern and selected options
