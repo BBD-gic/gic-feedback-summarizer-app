@@ -46,9 +46,12 @@ async function generatePatternSummary(selections = {}) {
         .select({
             fields: [
                 ...Object.values(FIELD_NAMES),
-                ...PATTERN_FIELDS.flatMap(p => [p, `${p} - term`]),
+                ...PATTERN_FIELDS.flatMap(p => [p, `${p} - term`, `${p} - quote`]),
                 "Child Name",
-                "Phone"
+                "Phone",
+                // Ensure all possible liked/disliked challenge columns are fetched
+                "Challenge Favorite",
+                "Challenge Disliked"
             ]
         })
         .eachPage((fetched, next) => {
@@ -92,33 +95,32 @@ async function generatePatternSummary(selections = {}) {
 
         for (const record of filteredRecords) {
             const category = normalize(record.get(pattern));
-            const term = normalize(record.get(`${pattern} - term`));
+            const quote = normalize(record.get(`${pattern} - quote`));
+            // const term = normalize(record.get(`${pattern} - term`));
 
             if (!category) continue;
 
             if (!categoryMap[category]) {
-                categoryMap[category] = { count: 0, terms: new Set() };
+                categoryMap[category] = { count: 0, quotes: [] };
             }
 
             categoryMap[category].count += 1;
-            if (term) categoryMap[category].terms.add(term);
+            if (quote) categoryMap[category].quotes.push(quote);
         }
 
         if (Object.keys(categoryMap).length > 0) {
             summary[pattern] = {};
-            for (const [cat, { count, terms }] of Object.entries(categoryMap)) {
-                let termsArr = Array.from(terms).sort();
-                if (termsArr.length > 10) {
-                    // Shuffle and take 10 random terms
-                    for (let i = termsArr.length - 1; i > 0; i--) {
-                        const j = Math.floor(Math.random() * (i + 1));
-                        [termsArr[i], termsArr[j]] = [termsArr[j], termsArr[i]];
-                    }
-                    termsArr = termsArr.slice(0, 10).sort();
+            for (const [cat, { count, quotes }] of Object.entries(categoryMap)) {
+                // Shuffle and take up to 5 random quotes
+                let quotesArr = Array.from(quotes);
+                for (let i = quotesArr.length - 1; i > 0; i--) {
+                    const j = Math.floor(Math.random() * (i + 1));
+                    [quotesArr[i], quotesArr[j]] = [quotesArr[j], quotesArr[i]];
                 }
+                quotesArr = quotesArr.slice(0, 5);
                 summary[pattern][cat] = {
                     count,
-                    terms: termsArr
+                    quotes: quotesArr
                 };
             }
         }
@@ -132,6 +134,49 @@ async function generatePatternSummary(selections = {}) {
         summaryOut[pattern] = cats;
     }
 
+    // 👍 Most Liked and 👎 Most Disliked Challenges
+    const likedCounts = {};
+    const dislikedCounts = {};
+    let likedOther = 0;
+    let dislikedOther = 0;
+    for (const record of filteredRecords) {
+        // Check both capitalizations for robustness
+        const liked = normalize(record.get("Challenge Favorite")) || normalize(record.get("Challenge favorite"));
+        const disliked = normalize(record.get("Challenge Disliked")) || normalize(record.get("Challenge disliked"));
+        if (liked) {
+            for (const challenge of liked.split(",").map(s => s.trim()).filter(Boolean)) {
+                if (/^Other/i.test(challenge)) {
+                    likedOther += 1;
+                } else {
+                    likedCounts[challenge] = (likedCounts[challenge] || 0) + 1;
+                }
+            }
+        }
+        if (disliked) {
+            for (const challenge of disliked.split(",").map(s => s.trim()).filter(Boolean)) {
+                if (/^Other/i.test(challenge)) {
+                    dislikedOther += 1;
+                } else {
+                    dislikedCounts[challenge] = (dislikedCounts[challenge] || 0) + 1;
+                }
+            }
+        }
+    }
+    if (likedOther > 0) likedCounts['Other'] = likedOther;
+    if (dislikedOther > 0) dislikedCounts['Other'] = dislikedOther;
+    summaryOut["Most Liked Challenges"] = likedCounts;
+    summaryOut["Most Disliked Challenges"] = dislikedCounts;
+
+    // 🖨️ Log liked/disliked challenges
+    console.log("\n👍 Most Liked Challenges:");
+    Object.entries(likedCounts).sort((a, b) => b[1] - a[1]).forEach(([challenge, count]) => {
+        console.log(`  - ${challenge}: ${count}`);
+    });
+    console.log("\n👎 Most Disliked Challenges:");
+    Object.entries(dislikedCounts).sort((a, b) => b[1] - a[1]).forEach(([challenge, count]) => {
+        console.log(`  - ${challenge}: ${count}`);
+    });
+
     // 🧾 Log filtered records
     console.log("\n📄 Filtered Records:");
     filteredRecords.forEach((record, index) => {
@@ -142,10 +187,10 @@ async function generatePatternSummary(selections = {}) {
     console.log("\n📊 Generated Summary:");
     for (const [pattern, categories] of Object.entries(summary)) {
         console.log(`\n🔹 ${pattern}`);
-        for (const [category, { count, terms }] of Object.entries(categories)) {
+        for (const [category, { count, quotes }] of Object.entries(categories)) {
             console.log(`  - ${category}: ${count}`);
-            if (terms.length) {
-                console.log(`    Terms: ${terms.join(", ")}`);
+            if (quotes.length) {
+                console.log(`    Quotes: ${quotes.join(" | ")}`);
             }
         }
     }
