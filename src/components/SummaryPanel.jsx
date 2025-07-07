@@ -271,7 +271,7 @@ const SummaryPanel = ({ selectedFilters }) => {
             padding: "1rem 2rem" // ensures no text is cut off behind scrollbar
           }}
         >
-          {loading || !summaryData ? (
+          {loading || !summaryData || !summaryData.summary ? (
             <p>⏳ Generating summary...</p>
           ) : (
             <>
@@ -286,40 +286,78 @@ const SummaryPanel = ({ selectedFilters }) => {
                   </div>
                 </div>
               )}
+
+              {/* Most Liked Challenges */}
+              {summaryData.summary["Most Liked Challenges"] && Object.keys(summaryData.summary["Most Liked Challenges"]).length > 0 && (
+                <div style={{ marginBottom: "1.5rem" }}>
+                  <h3 style={{ fontSize: "1.15rem", color: "#1a7f37", marginBottom: "0.5rem" }}>👍 Most Liked Challenges</h3>
+                  <ul style={{ margin: 0, paddingLeft: "1.2em", fontSize: "1rem" }}>
+                    {(() => {
+                      const entries = Object.entries(summaryData.summary["Most Liked Challenges"]);
+                      const rest = entries.filter(([challenge]) => challenge !== 'Other').sort((a, b) => b[1] - a[1]);
+                      const others = entries.filter(([challenge]) => challenge === 'Other');
+                      return rest.concat(others).map(([challenge, count]) => (
+                        <li key={challenge} style={{ marginBottom: "0.2rem" }}>
+                          <strong>{challenge}</strong>: {count}
+                        </li>
+                      ));
+                    })()}
+                  </ul>
+                </div>
+              )}
+
+              {/* Most Disliked Challenges */}
+              {summaryData.summary["Most Disliked Challenges"] && Object.keys(summaryData.summary["Most Disliked Challenges"]).length > 0 && (
+                <div style={{ marginBottom: "1.5rem" }}>
+                  <h3 style={{ fontSize: "1.15rem", color: "#b91c1c", marginBottom: "0.5rem" }}>👎 Most Disliked Challenges</h3>
+                  <ul style={{ margin: 0, paddingLeft: "1.2em", fontSize: "1rem" }}>
+                    {(() => {
+                      const entries = Object.entries(summaryData.summary["Most Disliked Challenges"]);
+                      const rest = entries.filter(([challenge]) => challenge !== 'Other').sort((a, b) => b[1] - a[1]);
+                      const others = entries.filter(([challenge]) => challenge === 'Other');
+                      return rest.concat(others).map(([challenge, count]) => (
+                        <li key={challenge} style={{ marginBottom: "0.2rem" }}>
+                          <strong>{challenge}</strong>: {count}
+                        </li>
+                      ));
+                    })()}
+                  </ul>
+                </div>
+              )}
+
               {Object.entries(summaryData.summary)
-                .filter(([pattern]) => pattern !== "Total records available" && pattern !== "Records fetched")
+                .filter(([pattern]) =>
+                  pattern !== "Total records available" &&
+                  pattern !== "Records fetched" &&
+                  pattern !== "Most Liked Challenges" &&
+                  pattern !== "Most Disliked Challenges"
+                )
                 .map(([pattern, categories]) => (
                   <div key={pattern} style={{ marginBottom: "1.75rem" }}>
-                    <h3 style={{ fontSize: "1.05rem", marginBottom: "0.6rem", lineHeight: "1.6" }}>
+                    <h3 style={{ fontSize: "1.2rem", marginBottom: "0.75rem" }}>
                       {patternEmojis[pattern] || "🔹"} {pattern}
                     </h3>
-                    {Object.entries(categories).map(([category, { count, terms }]) => (
-                      <div key={category} style={{ marginBottom: "0.7rem", paddingLeft: "1rem" }}>
-                        <p style={{ margin: 0, fontSize: "0.95rem", lineHeight: "1.7" }}>
+                    {Object.entries(categories).map(([category, { count, quotes }]) => (
+                      <div key={category} style={{ marginBottom: "0.75rem", paddingLeft: "1rem" }}>
+                        <p style={{ margin: 0, fontSize: "1rem" }}>
                           • <strong>{count} out of {summaryData.total}</strong> students were <em>{category.toLowerCase()}</em>.
                         </p>
-                        {terms.length > 0 && (
-                          <p
-                            style={{
-                              fontSize: "0.9rem",
-                              color: "#4a5568",
-                              marginLeft: "1rem",
-                              marginTop: "0.25rem",
-                              lineHeight: "1.6"
-                            }}
-                          >
-                            🏷️ Common phrases:{" "}
-                            {terms.map((term, i) => (
-                              <span key={i} style={{ marginRight: "0.5rem" }}>
-                                "{term}"
-                              </span>
-                            ))}
-                          </p>
+                        {Array.isArray(quotes) && quotes.length > 0 && (
+                          <div style={{ fontSize: "0.95rem", color: "#4a5568", marginLeft: "1rem", marginTop: "0.25rem" }}>
+                            <span role="img" aria-label="quote">💬</span> Sample quotes:
+                            <ul style={{ margin: 0, paddingLeft: "1.2em" }}>
+                              {quotes.map((quote, i) => (
+                                <li key={i} style={{ marginBottom: "0.2rem" }}>
+                                  <span style={{ fontStyle: "italic" }}>&ldquo;{quote}&rdquo;</span>
+                                </li>
+                              ))}
+                            </ul>
+                          </div>
                         )}
                       </div>
                     ))}
                   </div>
-              ))}
+                ))}
             </>
           )}
         </div>
@@ -343,17 +381,20 @@ const SummaryPanel = ({ selectedFilters }) => {
             setUpdateStatus("");
             try {
               await fetch("https://gic-feedback-summarizer-app.onrender.com/sync-child-data");
+              // Always show the same message regardless of backend
               setUpdateStatus("Updated Unsummarized Records.");
+              updateTimeoutRef.current = setTimeout(() => {
+                setUpdating(false);
+                setUpdateStatus("");
+              }, 2000);
             } catch (err) {
               setUpdateStatus("Error updating summaries");
-            } finally {
               updateTimeoutRef.current = setTimeout(() => {
                 setUpdating(false);
                 setUpdateStatus("");
               }, 2000);
             }
           }}
-
         >
           Update Summaries
         </button>
@@ -386,7 +427,7 @@ const iconStyle = {
 };
 
 const bottomBtnStyle = {
-  padding: "0.75rem 1rem",
+  padding: "1rem 1.4rem",
   backgroundColor: "black",
   opacity: 0.65,
   color: "#fff",
