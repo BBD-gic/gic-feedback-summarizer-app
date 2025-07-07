@@ -41,6 +41,10 @@ Your task is to analyze each student's full conversation and generate a detailed
 
 ------------------------------------------------------------
 
+To identify the overall sentiment and the terms and quotes for it, you can use students’ recommendation sentiment as reference if available (otherwise look elsewhere). 
+
+------------------------------------------------------------
+
 📊 2. Assign a **Reflection Depth Score (1–3)** based on how thoughtful and expressive the student was:
 - 3 = Rich, detailed reflections and clear thought process
 - 2 = Reasonable clarity with some detail
