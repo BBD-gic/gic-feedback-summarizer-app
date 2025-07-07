@@ -1,9 +1,9 @@
 import copyIcon from "../assets/images/copy-button.png";
 import downloadIcon from "../assets/images/download-button.png";
 import html2canvas from "html2canvas";
-
 import { useEffect, useState, useRef } from "react";
 import { jsPDF } from "jspdf";
+import { useNavigate } from "react-router-dom";
 
 const patternEmojis = {
   "Engagement & Enjoyment": "🎉",
@@ -22,6 +22,7 @@ const SummaryPanel = ({ selectedFilters }) => {
   const [summaryData, setSummaryData] = useState(null);
   const [loading, setLoading] = useState(false);
   const summaryRef = useRef();
+  const navigate = useNavigate();
 
   // New state for update popup
   const [updating, setUpdating] = useState(false);
@@ -166,6 +167,22 @@ const SummaryPanel = ({ selectedFilters }) => {
     pdf.save("summary.pdf");
   };
 
+
+  const handleDeepDive = () => {
+    // Note: console.log here logs to the browser's developer console, not the terminal.
+    // To log in the terminal, send the data to your backend and log it there.
+    if (summaryData && summaryData.summary) {
+      console.log("\n[Deep Dive] Filtered Records and Fetched Data:");
+      console.log(JSON.stringify(summaryData, null, 2));
+      // Example: send to backend for terminal logging
+      // fetch("https://gic-feedback-summarizer-app.onrender.com/log-summary", {
+      //   method: "POST",
+      //   headers: { "Content-Type": "application/json" },
+      //   body: JSON.stringify(summaryData)
+      // });
+    }
+    navigate("/deep-dive", { state: { summaryData } });
+  };
 
   return (
     <div
@@ -345,12 +362,15 @@ const SummaryPanel = ({ selectedFilters }) => {
                         {Array.isArray(quotes) && quotes.length > 0 && (
                           <div style={{ fontSize: "0.95rem", color: "#4a5568", marginLeft: "1rem", marginTop: "0.25rem" }}>
                             <span role="img" aria-label="quote">💬</span> Sample quotes:
-                            <ul style={{ margin: 0, paddingLeft: "1.2em" }}>
-                              {quotes.map((quote, i) => (
-                                <li key={i} style={{ marginBottom: "0.2rem" }}>
-                                  <span style={{ fontStyle: "italic" }}>&ldquo;{quote}&rdquo;</span>
-                                </li>
-                              ))}
+                            <ul>
+                              {quotes.map((q, i) => {
+                                const text = typeof q === "object" ? q.quote : q;
+                                return (
+                                  <li key={i}>
+                                    <span style={{ fontStyle: "italic" }}>&ldquo;{text}&rdquo;</span>
+                                  </li>
+                                );
+                              })}
                             </ul>
                           </div>
                         )}
@@ -401,6 +421,7 @@ const SummaryPanel = ({ selectedFilters }) => {
         <button
           style={bottomBtnStyle}
           className="summary-bottom-btn"
+          onClick={handleDeepDive}
         >
           Dive Deep
         </button>
