@@ -45,11 +45,12 @@ async function generatePatternSummary(selections = {}) {
     await base(tableName)
         .select({
             fields: [
-                ...Object.values(FIELD_NAMES),
-                ...PATTERN_FIELDS.flatMap(p => [p, `${p} - term`, `${p} - quote`]),
                 "Child Name",
+                FIELD_NAMES.Grade,
+                FIELD_NAMES.Gender,
+                ...Object.values(FIELD_NAMES).filter(f => f !== FIELD_NAMES.Grade && f !== FIELD_NAMES.Gender),
+                ...PATTERN_FIELDS.flatMap(p => [p, `${p} - term`, `${p} - quote`]),
                 "Phone",
-                // Ensure all possible liked/disliked challenge columns are fetched
                 "Challenge Favorite",
                 "Challenge Disliked"
             ]
@@ -105,7 +106,15 @@ async function generatePatternSummary(selections = {}) {
             }
 
             categoryMap[category].count += 1;
-            if (quote) categoryMap[category].quotes.push(quote);
+            if (quote) {
+                categoryMap[category].quotes.push({
+                    quote,
+                    name: record.get("Child Name") || "-",
+                    grade: cleanRollupValue(record.get("Child Grade Rollup (from Child UID)")) || "-",
+                    gender: cleanRollupValue(record.get("Child Gender Rollup (from Child UID)")) || "-"
+                });
+            }
+
         }
 
         if (Object.keys(categoryMap).length > 0) {
@@ -177,11 +186,24 @@ async function generatePatternSummary(selections = {}) {
         console.log(`  - ${challenge}: ${count}`);
     });
 
-    // 🧾 Log filtered records
-    console.log("\n📄 Filtered Records:");
-    filteredRecords.forEach((record, index) => {
-        console.log(`${index + 1}. ${record.get("Child Name")} (${record.get("Phone")})`);
+    // 🧾 Log filtered records and data in JSON format for Deep Dive page
+    console.log("\n📄 Filtered Records (JSON for Deep Dive):");
+    const filteredJson = filteredRecords.map(record => {
+        const out = {
+            name: record.get("Child Name"),
+            grade: cleanRollupValue(record.get(FIELD_NAMES.Grade)),
+            gender: cleanRollupValue(record.get(FIELD_NAMES.Gender)),
+            phone: record.get("Phone"),
+        };
+        PATTERN_FIELDS.forEach(pattern => {
+            out[pattern] = {
+                category: normalize(record.get(pattern)),
+                quote: normalize(record.get(`${pattern} - quote`)),
+            };
+        });
+        return out;
     });
+    console.log(JSON.stringify(filteredJson, null, 2));
 
     // 📊 Log summary
     console.log("\n📊 Generated Summary:");
@@ -194,6 +216,25 @@ async function generatePatternSummary(selections = {}) {
             }
         }
     }
+
+    // 🖨️ Log all fetched data in JSON format
+    console.log("\n📦 All fetched records (raw from Airtable):");
+    const allFetchedJson = records.map(record => {
+        const out = {
+            name: record.get("Child Name"),
+            grade: cleanRollupValue(record.get(FIELD_NAMES.Grade)),
+            gender: cleanRollupValue(record.get(FIELD_NAMES.Gender)),
+            phone: record.get("Phone"),
+        };
+        PATTERN_FIELDS.forEach(pattern => {
+            out[pattern] = {
+                category: normalize(record.get(pattern)),
+                quote: normalize(record.get(`${pattern} - quote`)),
+            };
+        });
+        return out;
+    });
+    console.log(JSON.stringify(allFetchedJson, null, 2));
 
     return { total, summary: summaryOut };
 }
